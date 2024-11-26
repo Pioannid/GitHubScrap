@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "gitscrapper"
+version = "0.1.0"
+description = ""
+authors = ["Panagiotis Ioannidis <pioannidis@pisquared.io>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+gitpython = "^3.1.43"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
