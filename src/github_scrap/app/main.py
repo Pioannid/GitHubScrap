@@ -6,6 +6,10 @@ Author: Panagiotis Ioannidis
 
 import argparse
 import sys
+import os
+import getpass
+import requests
+from urllib.parse import urlparse
 from typing import Optional, Set
 
 from github_scrap.app.git_code_scrap import GitHubCodeScraper
@@ -23,8 +27,7 @@ def main(
     scraper = GitHubCodeScraper(
         repo_path,
         ignored_dirs=ignored_dirs,
-        file_extensions={'.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.hpp',
-                         '.h'},
+        file_extensions={'.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.hpp', '.h'},
         ignore_file=ignore_file,
         token=token,
         branch=branch,
@@ -62,7 +65,8 @@ def cli() -> None:
     parser.add_argument("--ignore-file", "-c",
                         help="Path to configuration file with ignore rules")
     parser.add_argument("--token", "-t",
-                        help="GitHub token for private repositories (if URL provided)")
+                        help=("Path to file containing GitHub token for private repositories. "
+                              "Defaults to environment variable GITHUB_TOKEN if not provided."))
     parser.add_argument("--branch", "-b", default="main",
                         help="Branch to scrape (default: main)")
 
@@ -75,13 +79,32 @@ def cli() -> None:
         parser.print_help()
         sys.exit(1)
 
+    if args.token:
+        try:
+            with open(args.token, 'r', encoding='utf-8') as token_file:
+                token = token_file.read().strip()
+        except Exception as e:
+            token = None
+    else:
+        token = os.getenv("GITHUB_TOKEN")
+
+    if not token and args.repo_path.startswith("http"):
+        parsed_url = urlparse(args.repo_path)
+        path_parts = parsed_url.path.strip("/").split("/")
+        if len(path_parts) >= 2:
+            owner, repo = path_parts[0], path_parts[1]
+            api_url = f"https://api.github.com/repos/{owner}/{repo}"
+            response = requests.get(api_url)
+            if response.status_code != 200:
+                token = getpass.getpass("Enter your GitHub token: ")
+
     result = main(
         repo_path=args.repo_path,
         output_file=args.output,
         ignored_dirs=set(args.ignore_dirs) if args.ignore_dirs else None,
         ignored_files=set(args.ignore_files) if args.ignore_files else None,
         ignore_file=args.ignore_file,
-        token=args.token,
+        token=token,
         branch=args.branch,
     )
     print(result)
