@@ -8,7 +8,7 @@ import argparse
 import sys
 from typing import Optional, Set
 
-from github_scrapper.app.git_code_scraper import GitHubCodeScraper
+from github_scraper.app.git_code_scraper import GitHubCodeScraper
 
 def main(
     repo_path: str,
