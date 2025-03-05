@@ -107,7 +107,6 @@ def cli() -> None:
         token=token,
         branch=args.branch,
     )
-    print(result)
 
 
 if __name__ == "__main__":
