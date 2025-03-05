@@ -1,15 +1,29 @@
 Below is an example of a README that includes a list of available CLI options for your package:
 
-# GitHub Scrapper
+# GitHub Scrap
 
-A tool to scrape code from Git repositories for LLM analysis.
+A tool to scrape code from Git repositories for LLM or other analysis. Below is an example output. This example assumes that your repository contains a file named hello.py with a simple function.
+When you run the tool, you might see output similar to:
+
+```python
+### File: hello.py
+def greet():
+    print("Hello, world!")
+
+```
 
 ## Installation
 
 You can install the package using PyPI
 
 ```bash
-pip install github-scrapper
+pip install github-scrap
+```
+
+Or, if you use Poetry:
+
+```bash
+poetry add github-scrap
 ```
 
 or directly from GitHub:
@@ -17,17 +31,6 @@ or directly from GitHub:
 ```bash
 pip install git+https://github.com/Pioannid/GitHubScrap.git
 ```
-
-Or, if you use Poetry, add the dependency in your pyproject.toml:
-
-```bash
-[tool.poetry.dependencies]
-github-scrapper = { git = "https://github.com/Pioannid/GitHubScrap.git" }
-```
-
-Then run:
-
-`poetry install`
 
 ## Usage
 
@@ -85,9 +88,7 @@ Example:
 
 To scrape the repository on the main branch and save the output to output.txt:
 
-github-scrapper https://github.com/Pioannid/GitHubScrapper --branch main --output output.txt
-
-If you run github-scrapper without any arguments, the tool will display the help message listing all these options.
+github-scrap https://github.com/Pioannid/GitHubScrap --branch main --output output.txt
 
 License
 
