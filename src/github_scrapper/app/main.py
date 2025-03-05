@@ -5,6 +5,7 @@ Author: Panagiotis Ioannidis
 """
 
 import argparse
+import sys
 from typing import Optional, Set
 
 from github_scrapper.app.git_code_scraper import GitHubCodeScraper
@@ -39,19 +40,33 @@ def main(
             scraper.logger.error(f"Error saving output: {e}")
     return formatted_output
 
-if __name__ == "__main__":
+def cli() -> None:
+    """
+    Command-line interface that parses arguments and calls the main function.
+    If no arguments are provided, prints the help message.
+    """
     parser = argparse.ArgumentParser(
         description="Scrape code from a Git repository for LLM analysis"
     )
-    parser.add_argument("repo_path", help="Path to the Git repository or its URL")
+    # Make repo_path optional so we can check it manually
+    parser.add_argument("repo_path", nargs="?", help="Path to the Git repository or its URL")
     parser.add_argument("--output", "-o", help="Path to save the formatted output")
     parser.add_argument("--ignore-dirs", "-id", nargs="+", help="Additional directories to ignore")
     parser.add_argument("--ignore-files", "-if", nargs="+", help="Specific files to ignore")
     parser.add_argument("--ignore-file", "-c", help="Path to configuration file with ignore rules")
     parser.add_argument("--token", "-t", help="GitHub token for private repositories (if URL provided)")
     parser.add_argument("--branch", "-b", default="main", help="Branch to scrape (default: main)")
+
+    if len(sys.argv) == 1 or not sys.argv[1]:
+        parser.print_help()
+        sys.exit(0)
+
     args = parser.parse_args()
-    main(
+    if not args.repo_path:
+        parser.print_help()
+        sys.exit(1)
+
+    result = main(
         repo_path=args.repo_path,
         output_file=args.output,
         ignored_dirs=set(args.ignore_dirs) if args.ignore_dirs else None,
@@ -60,3 +75,7 @@ if __name__ == "__main__":
         token=args.token,
         branch=args.branch,
     )
+    print(result)
+
+if __name__ == "__main__":
+    cli()
