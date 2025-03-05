@@ -7,7 +7,7 @@ Author: Panagiotis Ioannidis
 import argparse
 from typing import Optional, Set
 
-from github_scrapper.app.git_code_scraper import GitCodeScraper
+from git_code_scraper import GitCodeScraper
 
 def main(
     repo_path: str,
