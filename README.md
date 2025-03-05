@@ -6,7 +6,7 @@ A tool to scrape code from Git repositories for LLM analysis.
 
 ## Installation
 
-You can install the package using PyPI 
+You can install the package using PyPI
 
 ```bash
 pip install github-scrapper
@@ -15,15 +15,15 @@ pip install github-scrapper
 or directly from GitHub:
 
 ```bash
-pip install git+https://github.com/Pioannid/GitHubScrapper.git
+pip install git+https://github.com/Pioannid/GitHubScrap.git
 ```
 
 Or, if you use Poetry, add the dependency in your pyproject.toml:
 
-`
+```bash
 [tool.poetry.dependencies]
-github-scrapper = { git = "https://github.com/Pioannid/GitHubScrapper.git" }
-`
+github-scrapper = { git = "https://github.com/Pioannid/GitHubScrap.git" }
+```
 
 Then run:
 
@@ -34,7 +34,7 @@ Then run:
 ### Python Script
 
 ```python
-from github_scrapper import GitHubCodeScraper
+from github_scrap import GitHubCodeScraper
 
 repo_url = "https://github.com/Pioannid/GitHubScrapper"
 scraper = GitHubCodeScraper(repo_path=repo_url, branch="main")
@@ -45,57 +45,43 @@ print(formatted_output)
 
 ### CLI
 
-After installation, the CLI tool is available as github-scrapper. The basic usage is:
+After installation, the CLI tool is available as github-scrap. The basic usage is:
 
-`github-scrapper [OPTIONS] REPO_PATH`
+`github-scrap [OPTIONS] REPO_PATH`
 
 Where REPO_PATH is the path to the Git repository or its URL.
 
 –output, -o:
 Description: Specify a file path to save the formatted output.
 Example:
-
 --output output.txt
-
 
 –ignore-dirs, -id:
 Description: Additional directories to ignore. Accepts one or more directory names.
 Example:
-
 --ignore-dirs venv node_modules
-
 
 –ignore-files, -if:
 Description: Specific files to ignore. Accepts one or more filenames.
 Example:
-
 --ignore-files README.md LICENSE
 
-
 –ignore-file, -c:
-
 Description: Path to a configuration file with ignore rules (for both files and directories).
 Example:
-
 --ignore-file .gitignore
-
 
 –token, -t:
 Description: GitHub token for private repositories (if REPO_PATH is a URL).
 Example:
-
 --token YOUR_GITHUB_TOKEN
-
 
 –branch, -b:
 Description: The branch to scrape from. Default is main.
 Example:
-
 --branch develop
 
-
-
-Example Command
+### Example Command
 
 To scrape the repository on the main branch and save the output to output.txt:
 
