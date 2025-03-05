@@ -1,6 +1,6 @@
 # GitHub Scrapper
 
-A tool to scrape code from Git repositories for LLM analysis.
+A tool to scrape code from GitHub repositories for LLM analysis.
 
 ## Installation
 
