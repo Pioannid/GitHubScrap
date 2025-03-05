@@ -5,13 +5,14 @@ Author: Panagiotis Ioannidis
 """
 
 import argparse
-import sys
-import os
 import getpass
-import requests
-from urllib.parse import urlparse
+import logging
+import os
+import sys
 from typing import Optional, Set
+from urllib.parse import urlparse
 
+import requests
 from github_scrap.app.git_code_scrap import GitHubCodeScraper
 
 
@@ -27,7 +28,8 @@ def main(
     scraper = GitHubCodeScraper(
         repo_path,
         ignored_dirs=ignored_dirs,
-        file_extensions={'.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.hpp', '.h'},
+        file_extensions={'.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.hpp',
+                         '.h'},
         ignore_file=ignore_file,
         token=token,
         branch=branch,
@@ -65,8 +67,13 @@ def cli() -> None:
     parser.add_argument("--ignore-file", "-c",
                         help="Path to configuration file with ignore rules")
     parser.add_argument("--token", "-t",
-                        help=("Path to file containing GitHub token for private repositories. "
-                              "Defaults to environment variable GITHUB_TOKEN if not provided."))
+                        help=(
+                            "Path to file containing GitHub token for private "
+                            "repositories. "
+                            "Defaults to environment variable GITHUB_TOKEN if not "
+                            "provided."))
+    parser.add_argument("--verbose", "-v", action="store_true",
+                        help="Show detailed log output")
     parser.add_argument("--branch", "-b", default="main",
                         help="Branch to scrape (default: main)")
 
@@ -78,6 +85,11 @@ def cli() -> None:
     if not args.repo_path:
         parser.print_help()
         sys.exit(1)
+
+    if args.verbose:
+        logging.getLogger().setLevel(logging.INFO)
+    else:
+        logging.getLogger().setLevel(logging.WARNING)
 
     if args.token:
         try:
