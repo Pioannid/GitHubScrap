@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 import git
 import requests
 
-from github_scraper.config.logging_config import configure_logging
+from github_scrap.config.logging_config import configure_logging
 
 class GitHubCodeScraper:
     def __init__(
