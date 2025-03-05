@@ -18,7 +18,7 @@ import requests
 
 from src.github_scrapper.config.logging_config import configure_logging
 
-class GitCodeScraper:
+class GitHubCodeScraper:
     def __init__(
         self,
         repo_path: str,

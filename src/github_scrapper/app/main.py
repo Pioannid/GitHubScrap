@@ -7,7 +7,7 @@ Author: Panagiotis Ioannidis
 import argparse
 from typing import Optional, Set
 
-from git_code_scraper import GitCodeScraper
+from git_code_scraper import GitHubCodeScraper
 
 def main(
     repo_path: str,
@@ -18,7 +18,7 @@ def main(
     token: Optional[str] = None,
     branch: str = "main",
 ) -> str:
-    scraper = GitCodeScraper(
+    scraper = GitHubCodeScraper(
         repo_path,
         ignored_dirs=ignored_dirs,
         file_extensions={'.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.hpp', '.h'},
