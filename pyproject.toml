@@ -1,16 +1,26 @@
 [tool.poetry]
-name = "gitscrapper"
+name = "github-scrapper"
 version = "0.1.0"
-description = ""
+description = "A tool to scrape code from Git repositories for LLM analysis."
 authors = ["Panagiotis Ioannidis <pioannidis@pisquared.io>"]
 readme = "README.md"
+license = "MIT"
+
+packages = [
+    { include = "github_scrapper", from = "src" }
+]
 
 [tool.poetry.dependencies]
-python = "^3.12"
-gitpython = "^3.1.43"
-requests = "^2.32.3"
+python = "^3.8"
+gitpython = "^3.1.30"
+requests = "^2.28.1"
 
+[tool.poetry.dev-dependencies]
+pytest = "^7.2.0"
+
+[tool.poetry.scripts]
+github-scrapper = "github_scrapper.app.main:main"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
