@@ -8,21 +8,23 @@ import argparse
 import sys
 from typing import Optional, Set
 
-from github_scrap.app.git_code_scraper import GitHubCodeScraper
+from github_scrap.app.git_code_scrap import GitHubCodeScraper
+
 
 def main(
-    repo_path: str,
-    output_file: Optional[str] = None,
-    ignored_dirs: Optional[Set[str]] = None,
-    ignored_files: Optional[Set[str]] = None,
-    ignore_file: Optional[str] = None,
-    token: Optional[str] = None,
-    branch: str = "main",
+        repo_path: str,
+        output_file: Optional[str] = None,
+        ignored_dirs: Optional[Set[str]] = None,
+        ignored_files: Optional[Set[str]] = None,
+        ignore_file: Optional[str] = None,
+        token: Optional[str] = None,
+        branch: str = "main",
 ) -> str:
     scraper = GitHubCodeScraper(
         repo_path,
         ignored_dirs=ignored_dirs,
-        file_extensions={'.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.hpp', '.h'},
+        file_extensions={'.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.hpp',
+                         '.h'},
         ignore_file=ignore_file,
         token=token,
         branch=branch,
@@ -40,6 +42,7 @@ def main(
             scraper.logger.error(f"Error saving output: {e}")
     return formatted_output
 
+
 def cli() -> None:
     """
     Command-line interface that parses arguments and calls the main function.
@@ -49,13 +52,19 @@ def cli() -> None:
         description="Scrape code from a Git repository for LLM analysis"
     )
     # Make repo_path optional so we can check it manually
-    parser.add_argument("repo_path", nargs="?", help="Path to the Git repository or its URL")
+    parser.add_argument("repo_path", nargs="?",
+                        help="Path to the Git repository or its URL")
     parser.add_argument("--output", "-o", help="Path to save the formatted output")
-    parser.add_argument("--ignore-dirs", "-id", nargs="+", help="Additional directories to ignore")
-    parser.add_argument("--ignore-files", "-if", nargs="+", help="Specific files to ignore")
-    parser.add_argument("--ignore-file", "-c", help="Path to configuration file with ignore rules")
-    parser.add_argument("--token", "-t", help="GitHub token for private repositories (if URL provided)")
-    parser.add_argument("--branch", "-b", default="main", help="Branch to scrape (default: main)")
+    parser.add_argument("--ignore-dirs", "-id", nargs="+",
+                        help="Additional directories to ignore")
+    parser.add_argument("--ignore-files", "-if", nargs="+",
+                        help="Specific files to ignore")
+    parser.add_argument("--ignore-file", "-c",
+                        help="Path to configuration file with ignore rules")
+    parser.add_argument("--token", "-t",
+                        help="GitHub token for private repositories (if URL provided)")
+    parser.add_argument("--branch", "-b", default="main",
+                        help="Branch to scrape (default: main)")
 
     if len(sys.argv) == 1 or not sys.argv[1]:
         parser.print_help()
@@ -76,6 +85,7 @@ def cli() -> None:
         branch=args.branch,
     )
     print(result)
+
 
 if __name__ == "__main__":
     cli()

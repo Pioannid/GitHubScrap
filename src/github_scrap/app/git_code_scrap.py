@@ -7,31 +7,34 @@ Summary:
     Supports both local and remote repositories with configurable filtering options.
 """
 
-import os
 import base64
+import os
 from pathlib import Path
-from typing import Dict, Set, Optional
+from typing import Dict, Optional, Set
 from urllib.parse import urlparse
 
 import git
 import requests
-
 from github_scrap.config.logging_config import configure_logging
+
 
 class GitHubCodeScraper:
     def __init__(
-        self,
-        repo_path: str,
-        ignored_dirs: Optional[Set[str]] = None,
-        file_extensions: Optional[Set[str]] = None,
-        ignore_file: Optional[str] = None,
-        token: Optional[str] = None,
-        branch: str = "main",
+            self,
+            repo_path: str,
+            ignored_dirs: Optional[Set[str]] = None,
+            file_extensions: Optional[Set[str]] = None,
+            ignore_file: Optional[str] = None,
+            token: Optional[str] = None,
+            branch: str = "main",
     ) -> None:
         self.repo_path: str = repo_path
-        self.default_ignored_dirs: Set[str] = {'venv', 'node_modules', '.git', '__pycache__'}
+        self.default_ignored_dirs: Set[str] = {'venv', 'node_modules', '.git',
+                                               '__pycache__'}
         self.ignored_dirs: Set[str] = ignored_dirs or self.default_ignored_dirs.copy()
-        self.file_extensions: Set[str] = file_extensions or {'.py', '.js', '.java', '.cpp', '.ts', '.jsx', '.tsx'}
+        self.file_extensions: Set[str] = file_extensions or {'.py', '.js', '.java',
+                                                             '.cpp', '.ts', '.jsx',
+                                                             '.tsx'}
         self.ignored_files: Set[str] = set()
         self.repo = None
         self.token: Optional[str] = token
@@ -43,7 +46,9 @@ class GitHubCodeScraper:
             parsed = urlparse(repo_path)
             path_parts = parsed.path.strip("/").split("/")
             if len(path_parts) < 2:
-                raise ValueError("Invalid repository URL. Expected format: 'https://github.com/owner/repo'")
+                raise ValueError(
+                    "Invalid repository URL. Expected format: "
+                    "'https://github.com/owner/repo'")
             self.remote_owner: str = path_parts[0]
             self.remote_repo: str = path_parts[1]
         else:
@@ -114,14 +119,16 @@ class GitHubCodeScraper:
 
     def scrape_remote_repository(self) -> Dict[str, str]:
         code_contents: Dict[str, str] = {}
-        api_url = f"https://api.github.com/repos/{self.remote_owner}/{self.remote_repo}/git/trees/{self.branch}?recursive=1"
+        api_url = (f"https://api.github.com/repos/{self.remote_owner}/"
+                   f"{self.remote_repo}/git/trees/{self.branch}?recursive=1")
         headers = {}
         if self.token:
             headers["Authorization"] = f"token {self.token}"
         self.logger.info(f"Fetching remote repository tree from {api_url}")
         response = requests.get(api_url, headers=headers)
         if response.status_code != 200:
-            self.logger.error(f"Failed to fetch repository tree: HTTP {response.status_code}")
+            self.logger.error(
+                f"Failed to fetch repository tree: HTTP {response.status_code}")
             return {}
         data = response.json()
         tree = data.get('tree', [])
@@ -138,15 +145,18 @@ class GitHubCodeScraper:
                         if encoding == 'base64':
                             try:
                                 decoded_bytes = base64.b64decode(content)
-                                file_content = decoded_bytes.decode('utf-8', errors='replace')
+                                file_content = decoded_bytes.decode('utf-8',
+                                                                    errors='replace')
                             except Exception as e:
-                                self.logger.error(f"Error decoding file {file_path}: {e}")
+                                self.logger.error(
+                                    f"Error decoding file {file_path}: {e}")
                                 continue
                         else:
                             file_content = content
                         code_contents[file_path] = file_content
                     else:
-                        self.logger.warning(f"Failed to fetch file {file_path}: HTTP {file_resp.status_code}")
+                        self.logger.warning(
+                            f"Failed to fetch file {file_path}: HTTP {file_resp.status_code}")
         return code_contents
 
     def scrape_repository(self) -> Dict[str, str]:
