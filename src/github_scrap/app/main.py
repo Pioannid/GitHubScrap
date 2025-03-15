@@ -81,8 +81,12 @@ def cli() -> None:
                         help="Branch to scrape (default: main)")
     # NEW: Add option for modifying file extensions.
     # Usage: --xt {add|remove} ext1 ext2 ...
-    parser.add_argument("--xt", nargs="+",
-                        help="Modify file extensions. Usage: --xt {add|remove} ext1 ext2 ...")
+    parser.add_argument(
+        "--xt",
+        nargs="+",
+        metavar=("OPERATION", "EXTENSIONS"),
+        help="Modify file extensions. Usage: --xt {add|remove} ext1 ext2 ..."
+    )
 
     if len(sys.argv) == 1 or not sys.argv[1]:
         parser.print_help()
