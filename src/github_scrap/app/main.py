@@ -24,12 +24,15 @@ def main(
         ignore_file: Optional[str] = None,
         token: Optional[str] = None,
         branch: str = "main",
+        file_extensions: Optional[Set[str]] = None,   # NEW parameter for file extensions
 ) -> str:
+    # Use provided file_extensions or default to a set including Django full-stack extensions.
+    default_extensions = file_extensions or {'.py', '.js', '.ts', '.jsx', '.tsx',
+                                               '.java', '.cpp', '.hpp', '.h', '.html', '.css'}
     scraper = GitHubCodeScraper(
         repo_path,
         ignored_dirs=ignored_dirs,
-        file_extensions={'.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.hpp',
-                         '.h'},
+        file_extensions=default_extensions,
         ignore_file=ignore_file,
         token=token,
         branch=branch,
@@ -76,6 +79,10 @@ def cli() -> None:
                         help="Show detailed log output")
     parser.add_argument("--branch", "-b", default="main",
                         help="Branch to scrape (default: main)")
+    # NEW: Add option for modifying file extensions.
+    # Usage: --xt {add|remove} ext1 ext2 ...
+    parser.add_argument("--xt", nargs="+",
+                        help="Modify file extensions. Usage: --xt {add|remove} ext1 ext2 ...")
 
     if len(sys.argv) == 1 or not sys.argv[1]:
         parser.print_help()
@@ -101,6 +108,7 @@ def cli() -> None:
         token = os.getenv("GITHUB_TOKEN")
 
     if not token and args.repo_path.startswith("http"):
+        from urllib.parse import urlparse
         parsed_url = urlparse(args.repo_path)
         path_parts = parsed_url.path.strip("/").split("/")
         if len(path_parts) >= 2:
@@ -110,7 +118,23 @@ def cli() -> None:
             if response.status_code != 200:
                 token = getpass.getpass("Enter your GitHub token: ")
 
-    result = main(
+    # Compute default file extensions including Django full stack extras.
+    default_extensions = {'.py', '.js', '.ts', '.jsx', '.tsx',
+                          '.java', '.cpp', '.hpp', '.h', '.html', '.css'}
+
+    # Process the new --xt option if provided.
+    if args.xt:
+        xt_op = args.xt[0].lower()  # Should be "add" or "remove"
+        if xt_op not in ["add", "remove"]:
+            parser.error("The --xt option must be followed by 'add' or 'remove'")
+        xt_extensions = {ext if ext.startswith('.') else f".{ext}" for ext in args.xt[1:]}
+        if xt_op == "add":
+            default_extensions = default_extensions.union(xt_extensions)
+        elif xt_op == "remove":
+            default_extensions = default_extensions.difference(xt_extensions)
+
+    # Call main with the computed file_extensions set.
+    main(
         repo_path=args.repo_path,
         output_file=args.output,
         ignored_dirs=set(args.ignore_dirs) if args.ignore_dirs else None,
@@ -118,6 +142,7 @@ def cli() -> None:
         ignore_file=args.ignore_file,
         token=token,
         branch=args.branch,
+        file_extensions=default_extensions,
     )
 
 
