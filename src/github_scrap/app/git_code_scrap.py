@@ -7,8 +7,9 @@ Summary:
     Supports both local and remote repositories with configurable filtering options.
 """
 
-import base64
+import io
 import os
+import zipfile
 from pathlib import Path
 from typing import Dict, Optional, Set
 from urllib.parse import urlparse
@@ -119,44 +120,32 @@ class GitHubCodeScraper:
 
     def scrape_remote_repository(self) -> Dict[str, str]:
         code_contents: Dict[str, str] = {}
-        api_url = (f"https://api.github.com/repos/{self.remote_owner}/"
-                   f"{self.remote_repo}/git/trees/{self.branch}?recursive=1")
+        archive_url = (f"https://api.github.com/repos/{self.remote_owner}/"
+                       f"{self.remote_repo}/zipball/{self.branch}")
         headers = {}
         if self.token:
             headers["Authorization"] = f"token {self.token}"
-        self.logger.info(f"Fetching remote repository tree from {api_url}")
-        response = requests.get(api_url, headers=headers)
+
+        self.logger.info(f"Downloading repository archive from {archive_url}")
+        response = requests.get(archive_url, headers=headers)
         if response.status_code != 200:
             self.logger.error(
-                f"Failed to fetch repository tree: HTTP {response.status_code}")
+                f"Failed to download archive: HTTP {response.status_code}")
             return {}
-        data = response.json()
-        tree = data.get('tree', [])
-        for item in tree:
-            if item.get('type') == 'blob':
-                file_path = item.get('path')
+
+        with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
+            for zip_info in zip_file.infolist():
+                if zip_info.is_dir():
+                    continue
+                file_path = zip_info.filename.split("/", 1)[
+                    -1]  # strip the repo root folder
                 if self._should_process_file(file_path):
-                    file_api_url = item.get('url')
-                    file_resp = requests.get(file_api_url, headers=headers)
-                    if file_resp.status_code == 200:
-                        file_data = file_resp.json()
-                        content = file_data.get('content', '')
-                        encoding = file_data.get('encoding', '')
-                        if encoding == 'base64':
-                            try:
-                                decoded_bytes = base64.b64decode(content)
-                                file_content = decoded_bytes.decode('utf-8',
-                                                                    errors='replace')
-                            except Exception as e:
-                                self.logger.error(
-                                    f"Error decoding file {file_path}: {e}")
-                                continue
-                        else:
-                            file_content = content
-                        code_contents[file_path] = file_content
-                    else:
-                        self.logger.warning(
-                            f"Failed to fetch file {file_path}: HTTP {file_resp.status_code}")
+                    try:
+                        with zip_file.open(zip_info) as file:
+                            file_content = file.read().decode("utf-8", errors="replace")
+                            code_contents[file_path] = file_content
+                    except Exception as e:
+                        self.logger.warning(f"Failed to read {file_path}: {e}")
         return code_contents
 
     def scrape_repository(self) -> Dict[str, str]:

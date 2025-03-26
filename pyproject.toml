@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "github-scrap"
-version = "0.1.2"
+version = "0.1.3"
 description = "A tool to scrape code from GitHub or local repositories for LLM analysis."
 authors = ["Panagiotis Ioannidis <pioannidis@pisquared.io>"]
 readme = "README.md"
